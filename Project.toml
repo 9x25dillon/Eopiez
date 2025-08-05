@@ -1,18 +1,19 @@
-name = "9xdSq-LIMPS-FemTO-R1C"
-uuid = "enhanced-kojima-motif-detection"
+name = "MotifAnalysis"
+uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 authors = ["9xKi11 <ai-n-satan>"]
-version = "1.0.0"
+version = "2.0.0"
 
 [deps]
-Symbolics = "0c5d359c-0dad-443e-898a-9c6e298f4ae3"
-TextAnalysis = "a2db9941-51cf-5565-b8a0-c9d955940fc1"
-HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-MultivariatePolynomials = "102ac46a-7723-53a2-8a1d-9ff65450fc1f"
-DynamicPolynomials = "313cdc1a-70c2-5d6a-ae07-269fd54c3955"
+Logging = "56ddb016-857d-54e1-b83d-db4d58db5568"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
