@@ -1,0 +1,17 @@
+[deps]
+Symbolics = "0c5d862f-8b57-4792-8d22-8077c9c60032"
+SymbolicNumericIntegration = "78aadeae-fbc0-11eb-17b6-aa0e2c8cff7d"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750b249bf"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+TextAnalysis = "a2db99b7-8b79-58c8-8897-301d4239c45e"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+Regex = "7c0e5441-75b4-5c2f-a738-6f7379071e5e"
+StringDistances = "88034a9c-02f8-509d-84a9-84ec65e18404"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
+[compat]
+julia = "1.9"
