@@ -1,52 +1,123 @@
-# Eopiez
+# 9xdSq-LIMPS-FemTO-R1C Enhanced
 
-A comprehensive AI-powered content analysis and processing system organized in phases.
+A high-performance Julia-based microservice providing advanced matrix optimization, stability analysis, and entropy regularization inspired by **TA ULS (Topology-Aware Uncertainty Learning Systems)** with enhanced **Kojima-esque motif detection** capabilities.
 
-## Project Overview
+## ✨ Enhanced Features
 
-Eopiez is a multi-phase project that implements advanced content analysis, vectorization, theming, compression, and integration capabilities. Each phase builds upon the previous one to create a complete content processing pipeline.
+### 🔍 Motif Detection Engine
+- **Symbolic Pattern Recognition**: Identifies Kojima-esque motifs (isolation, snakes, strands, memory)
+- **Sheaf-Theoretic Analysis**: Models narrative coherence using Grothendieck-style sheaf theory
+- **Motif Logic Trees**: Builds hierarchical narrative structures from fragmented inputs
+- **Emergent Structure Detection**: Finds higher-order symbolic patterns in text
 
-## Repository Structure
+### 🧠 Message Vectorizer
+- **Symbolic-to-Numerical Conversion**: Transforms motif tokens into vector representations
+- **Entropy Analysis**: Quantifies information content and uncertainty in narrative messages
+- **Coherence Metrics**: Measures narrative flow and structural consistency
+
+### 🎯 Integration Capabilities
+- **ULS Compatibility**: Feeds vectorized motifs into existing TA ULS optimization pipelines
+- **HTTP API**: Exposes motif detection functionality via JSON REST API
+- **Benchmark Metrics**: Provides motif recall/precision vs. manual benchmarks
+
+## 🚀 Getting Started
+
+### 1. Clone and Setup
+
+```bash
+git clone https://github.com/9x25dillon/9xdSq-LIMPS-FemTO-R1C.git
+cd 9xdSq-LIMPS-FemTO-R1C
+```
+
+### 2. Install Dependencies
+
+```bash
+julia
+```
+
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+```
+
+### 3. Run Installation Test
+
+```bash
+chmod +x test/test_installation.jl
+./test/test_installation.jl
+```
+
+## 🧪 Testing
+
+### Run All Tests
+
+```bash
+./test/test_installation.jl
+./test/test_motif_detection.jl
+```
+
+### Test Individual Components
+
+```julia
+include("test/test_motif_detection.jl")
+```
+
+## 🌐 HTTP Server Usage
+
+### Start the Server
+
+```julia
+include("src/MotifDetection/motif_server.jl")
+start_motif_server(8081)
+```
+
+### API Request Example
+
+```bash
+curl -X POST http://localhost:8081/detect \
+  -H "Content-Type: application/json" \
+  -d '{ "text": "He stood alone in the desert, watching the snake coil around the strand of memory." }'
+```
+
+## 📁 Project Structure
 
 ```
-/Eopiez
-├── README.md                 # This file - project overview
-├── ProjectPlan.md            # Detailed project planning and specifications
-├── /motif_detector          # Phase 1: Pattern and motif detection
-├── /message_vectorizer      # Phase 2: Content vectorization
-├── /sheaf_theme_engine      # Phase 3: Thematic analysis engine
-├── /dirac_compressor        # Phase 4: Advanced compression algorithms
-├── /integration_suite       # Phase 5: System integration and orchestration
-└── /tests                   # Comprehensive test suite
+9xdSq-LIMPS-FemTO-R1C/
+├── src/
+│   ├── MessageVectorizer.jl          # Symbolic message vectorization
+│   ├── MotifDetection/
+│   │   ├── parser.jl                 # Rule-based motif parsing
+│   │   ├── motifs.jl                 # Motif definitions and rules
+│   │   ├── tokenizer.jl              # Motif token creation
+│   │   ├── sheaf_engine.jl           # Sheaf-theoretic coherence engine
+│   │   ├── motif_logic_tree.jl       # Hierarchical motif structure
+│   │   ├── coherency.jl              # Narrative coherence algorithms
+│   │   ├── motif_server.jl           # HTTP API server
+│   │   └── integration.jl            # Pipeline integration
+│   └── (existing LIMPS modules)
+├── test/
+│   ├── test_installation.jl
+│   └── test_motif_detection.jl
+├── examples/
+│   └── kojima_analysis.jl
+└── (existing files)
 ```
 
-## Phase Descriptions
+## 🤝 Integration with Existing TA ULS
 
-### Phase 1: Motif Detector
-Advanced pattern recognition and motif detection algorithms for content analysis.
+The enhanced system works seamlessly with existing TA ULS components:
 
-### Phase 2: Message Vectorizer
-Content vectorization and embedding generation for semantic analysis.
+- **Matrix Optimization**: `optimize_matrix()` with motif-enhanced inputs
+- **Stability Analysis**: `stability_analysis()` on vectorized motifs
+- **Entropy Regularization**: `entropy_regularization()` with motif entropy scores
+- **LiMps Symbolic Memory**: Direct feed of motif tokens into symbolic memory engine
 
-### Phase 3: Sheaf Theme Engine
-Thematic analysis and content categorization using sheaf theory principles.
+## 📜 License
 
-### Phase 4: Dirac Compressor
-High-efficiency compression algorithms for optimized data storage and transmission.
+MIT License. See LICENSE file.
 
-### Phase 5: Integration Suite
-System integration, orchestration, and end-to-end workflow management.
+## 👨‍🔬 Authors
 
-## Getting Started
-
-1. Review `ProjectPlan.md` for detailed specifications
-2. Navigate to individual phase directories for implementation details
-3. Run tests from the `/tests` directory
-
-## Development Workflow
-
-Each phase should be developed sequentially, with thorough testing at each stage. The integration suite will combine all phases into a cohesive system.
-
-## License
-
-See LICENSE file for details.
+Developed by [9xKi11] ai n satan
+Inspired by TA ULS theory, information entropy dynamics, and Kojima's symbolic narrative structures.
