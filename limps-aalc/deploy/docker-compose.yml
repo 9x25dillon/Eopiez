@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: limps
+      POSTGRES_USER: limps
+      POSTGRES_DB: limps
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../db/migrations:/docker-entrypoint-initdb.d:ro
+
+  admin-api:
+    build: ../services/admin-api
+    command: uvicorn app:app --host 0.0.0.0 --port 8080 --reload
+    volumes:
+      - ../services/admin-api:/app
+    ports: ["8080:8080"]
+    depends_on: [postgres]
+
+  choppy-backend:
+    build: ../services/choppy-backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8090 --reload
+    volumes:
+      - ../services/choppy-backend:/app
+    ports: ["8090:8090"]
+    depends_on: [postgres]
+
+  julia-ref:
+    image: julia:1.10
+    working_dir: /srv
+    volumes:
+      - ../services/julia-ref:/srv
+    command: julia server.jl
+    ports: ["8008:8008"]
+
+volumes:
+  pgdata:

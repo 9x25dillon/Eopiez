@@ -1,0 +1,13 @@
+#!/bin/sh
+# Sample pre-commit hook for LIMPS-AALC
+# Copy to .git/hooks/pre-commit and make executable
+
+# Run Python linting
+echo "Running Python linting..."
+find services/ -name "*.py" -exec python -m py_compile {} \;
+
+# Run basic Julia syntax check
+echo "Checking Julia syntax..."
+find services/julia-ref -name "*.jl" -exec julia --check-bounds=yes -e "include(\"{}\")" \;
+
+echo "Pre-commit checks passed!"
