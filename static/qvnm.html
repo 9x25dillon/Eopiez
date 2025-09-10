@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>QVNM Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    input, button { padding: .4rem .6rem; }
+    pre { background:#f5f5f5; padding:1rem; border-radius:6px; max-height: 50vh; overflow:auto; }
+  </style>
+  <script>
+  async function uploadVectors(ev) {
+    const f = document.getElementById('file').files[0];
+    if (!f) { alert('choose file'); return; }
+    const fd = new FormData(); fd.append('file', f);
+    const r = await fetch('/qvnm/upload_vectors', { method:'POST', body: fd });
+    const j = await r.json();
+    window.sid = j.sid; document.getElementById('sid').textContent = window.sid || '';
+    log(j);
+  }
+  async function estimate() {
+    const r = await fetch('/qvnm/estimate_id', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ sid: window.sid, mode: 'local', k: 10, r: 64 }) });
+    log(await r.json());
+  }
+  async function preview() {
+    const r = await fetch('/qvnm/build_preview', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ sid: window.sid, knn_k: 10, r: 2, k_eval: 10, bins: 20 }) });
+    log(await r.json());
+  }
+  function log(x){ document.getElementById('out').textContent = JSON.stringify(x, null, 2); }
+  </script>
+</head>
+<body>
+  <h1>QVNM Demo</h1>
+  <p>Session: <code id="sid">(none)</code></p>
+  <p>
+    <input type="file" id="file" />
+    <button onclick="uploadVectors()">Upload</button>
+    <button onclick="estimate()">Estimate ID</button>
+    <button onclick="preview()">Preview</button>
+  </p>
+  <pre id="out"></pre>
+</body>
+</html>
+
