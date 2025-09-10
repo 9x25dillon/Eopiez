@@ -12,6 +12,10 @@ JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Regex = "7c0e5441-75b4-5c2f-a738-6f7379071e5e"
 StringDistances = "88034a9c-02f8-509d-84a9-84ec65e18404"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+SimpleWeightedGraphs = "47aef6b3-e1a8-537f-bab2-9b2240d2e58d"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 julia = "1.9"
