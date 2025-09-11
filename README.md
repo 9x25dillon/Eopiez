@@ -1,241 +1,200 @@
-# MotifAnalysis.jl
+# Message Vectorizer
 
-A professional, high-performance Julia library for detecting and analyzing Kojima-esque motifs in text with advanced vectorization and coherence analysis capabilities.
+A Julia-based system for transforming motif tokens into higher-order narrative/message states using symbolic computation and vector embeddings.
 
-## 🚀 Features
+## Overview
 
-- **Clean, Professional API**: Well-documented, type-safe interface
-- **Advanced Motif Detection**: Identifies 6 core motif types (isolation, snake, strand, memory, temporal, fragmentation)
-- **Vectorization**: Converts symbolic motifs to numerical representations
-- **Coherence Analysis**: Measures narrative flow and structural consistency
-- **Batch Processing**: Efficient analysis of multiple texts
-- **Comprehensive Testing**: Full test suite with 100% coverage
-- **Error Handling**: Robust error handling and validation
+The Message Vectorizer converts motif configurations (e.g., isolation + time, decay + memory) into compressed symbolic states represented as vectors. It uses Symbolics.jl for symbolic computation and provides entropy scoring for message complexity analysis.
 
-## 📦 Installation
+## Features
+
+- **Symbolic State Representation**: Uses Symbolics.jl for symbolic manipulation of motif configurations
+- **Vector Embeddings**: Creates high-dimensional vector representations of motif tokens
+- **Entropy Scoring**: Computes information entropy for message complexity analysis
+- **al-ULS Interface**: Provides formatted output for al-ULS module consumption
+- **Compression**: Compresses motif configurations into efficient symbolic states
+
+## Installation
+
+1. Clone this repository
+2. Install Julia dependencies:
 
 ```julia
 using Pkg
-Pkg.add("MotifAnalysis")
+Pkg.activate(".")
+Pkg.instantiate()
 ```
 
-Or clone and install locally:
+## Usage
 
-```bash
-git clone https://github.com/your-repo/MotifAnalysis.jl.git
-cd MotifAnalysis.jl
-julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate()'
-```
-
-## 🎯 Quick Start
+### Basic Usage
 
 ```julia
-using MotifAnalysis
+using MessageVectorizer
 
-# Analyze a single text
-text = "He stood alone in the desert, watching the snake coil around the strand of memory."
-result = analyze_text(text)
+# Create motif tokens
+isolation_motif = MotifToken(
+    :isolation_time,
+    Dict{Symbol, Any}(:intensity => 0.8, :duration => 24.0),
+    0.7,
+    [:temporal, :spatial, :emotional]
+)
 
-# Quick analysis
-quick_result = quick_analysis(text)
-println("Dominant motifs: $(quick_result["dominant_motifs"])")
-println("Coherence score: $(quick_result["coherence_score"])")
+decay_motif = MotifToken(
+    :decay_memory,
+    Dict{Symbol, Any}(:decay_rate => 0.3, :memory_strength => 0.6),
+    0.6,
+    [:cognitive, :temporal, :neural]
+)
 
-# Batch analysis
-texts = ["Alone in solitude.", "Snake coils around memory."]
-results = analyze_text_batch(texts)
+# Initialize vectorizer
+vectorizer = MessageVectorizer(64)
+
+# Add motif embeddings
+add_motif_embedding!(vectorizer, isolation_motif)
+add_motif_embedding!(vectorizer, decay_motif)
+
+# Vectorize message
+motifs = [isolation_motif, decay_motif]
+message_state = vectorize_message(motifs, vectorizer)
+
+# Get al-ULS compatible output
+uls_output = al_uls_interface(message_state)
 ```
 
-## 📚 API Reference
-
-### Core Functions
-
-#### `analyze_text(text::String) -> AnalysisResult`
-Perform complete motif analysis on text.
+### Advanced Configuration
 
 ```julia
-result = analyze_text("Alone snake memory strand.")
-println("Coherence: $(result.narrative_coherence)")
-println("Tokens: $(length(result.tokens))")
+# Custom vectorizer with specific parameters
+vectorizer = MessageVectorizer(
+    128,                    # embedding dimension
+    entropy_threshold=0.7,  # entropy threshold
+    compression_ratio=0.85  # compression ratio
+)
 ```
 
-#### `quick_analysis(text::String) -> Dict{String, Any}`
-Perform quick analysis with simplified results.
+## API Reference
+
+### Core Types
+
+#### `MotifToken`
+Represents a basic motif token with symbolic properties.
 
 ```julia
-result = quick_analysis("Alone snake memory.")
-# Returns: Dict with dominant_motifs, coherence_score, motif_count, entropy, motif_density
-```
-
-#### `analyze_text_batch(texts::Vector{String}) -> Vector{AnalysisResult}`
-Analyze multiple texts efficiently.
-
-```julia
-texts = ["Text 1", "Text 2", "Text 3"]
-results = analyze_text_batch(texts)
-```
-
-#### `compare_analyses(result1::AnalysisResult, result2::AnalysisResult) -> Dict{String, Any}`
-Compare two analysis results.
-
-```julia
-comparison = compare_analyses(result1, result2)
-println("Similarity: $(comparison["overall_similarity"])")
-```
-
-### Motif Detection
-
-#### `detect_motifs(text::String) -> Vector{MotifToken}`
-Detect all motifs in text.
-
-```julia
-tokens = detect_motifs("Alone snake memory strand.")
-for token in tokens
-    println("$(token.type): weight=$(token.weight), confidence=$(token.confidence)")
+struct MotifToken
+    name::Symbol                    # Motif identifier
+    properties::Dict{Symbol, Any}   # Motif properties
+    weight::Float64                 # Motif weight
+    context::Vector{Symbol}         # Contextual tags
 end
 ```
 
-#### `detect_motifs_by_type(text::String, motif_type::MotifType) -> Vector{MotifToken}`
-Detect specific motif types.
+#### `MessageState`
+Represents a compressed symbolic state of a message.
 
 ```julia
-isolation_tokens = detect_motifs_by_type(text, ISOLATION)
-snake_tokens = detect_motifs_by_type(text, SNAKE)
+struct MessageState
+    symbolic_expression::Num                    # Symbolic representation
+    vector_representation::Vector{Float64}     # Vector embedding
+    entropy_score::Float64                      # Information entropy
+    motif_configuration::Dict{Symbol, Float64} # Motif weights
+    metadata::Dict{String, Any}                # Additional metadata
+end
 ```
 
-### Vectorization
-
-#### `vectorize_motifs(tokens::Vector{MotifToken}) -> Vector{Float64}`
-Convert motifs to numerical vector.
+#### `MessageVectorizer`
+Main vectorizer for transforming motif tokens.
 
 ```julia
-vector = vectorize_motifs(tokens)
-println("Vector norm: $(norm(vector))")
+struct MessageVectorizer
+    motif_embeddings::Dict{Symbol, Vector{Float64}}  # Stored embeddings
+    symbolic_variables::Dict{Symbol, Num}            # Symbolic variables
+    embedding_dim::Int                               # Embedding dimension
+    entropy_threshold::Float64                       # Entropy threshold
+    compression_ratio::Float64                       # Compression ratio
+end
 ```
 
-#### `calculate_entropy(vector::Vector{Float64}) -> Float64`
-Calculate information entropy.
+### Core Functions
 
-```julia
-entropy = calculate_entropy(vector)
-```
+#### `vectorize_message(motifs, vectorizer)`
+Transform motif tokens into a message state vector.
 
-## 🏗️ Architecture
+#### `compute_entropy(vector, motif_config)`
+Compute entropy score for a message vector.
 
-The system is organized into clean, modular components:
+#### `create_motif_embedding(motif, dim)`
+Create a vector embedding for a motif token.
 
-```
-src/
-├── Types.jl           # Core type definitions
-├── Config.jl          # Configuration and constants
-├── TextProcessing.jl  # Text preprocessing utilities
-├── MotifDetector.jl   # Motif detection algorithms
-├── Vectorizer.jl      # Vectorization and numerical analysis
-├── Analyzer.jl        # Main analysis pipeline
-└── MotifAnalysis.jl   # Main module and API
-```
+#### `symbolic_state_compression(motifs, vectorizer)`
+Compress motif tokens into a symbolic state representation.
 
-### Key Types
+#### `al_uls_interface(message_state)`
+Format message state for al-ULS module consumption.
 
-- `MotifType`: Enumeration of motif types
-- `MotifToken`: Individual detected motif with metadata
-- `VectorizedMessage`: Numerical representation of text
-- `AnalysisResult`: Complete analysis results
+## Examples
 
-## 🧪 Testing
-
-Run the comprehensive test suite:
+### Running the Demo
 
 ```bash
-julia --project=. test/test_core.jl
+julia examples/message_vectorizer_demo.jl
 ```
 
-Or run tests interactively:
+### Running Tests
 
-```julia
-using Pkg
-Pkg.test("MotifAnalysis")
+```bash
+julia test/runtests.jl
 ```
 
-## 📊 Examples
+## Output Format
 
-### Basic Analysis
+The al-ULS interface provides the following output structure:
 
-```julia
-using MotifAnalysis
-
-text = "The phantom snake slithers through time, a strand of DNA uncoiling in silence."
-result = analyze_text(text)
-
-println("Detected $(length(result.tokens)) motifs")
-println("Narrative coherence: $(round(result.narrative_coherence, digits=3))")
-println("Dominant motifs: $(join([string(m) for m in result.dominant_motifs], ", "))")
+```json
+{
+  "symbolic_expression": "0.7*s + 0.6*τ + ...",
+  "vector_representation": [0.1, 0.2, 0.3, ...],
+  "entropy_score": 2.45,
+  "motif_configuration": {
+    "isolation_time": 0.7,
+    "decay_memory": 0.6
+  },
+  "metadata": {
+    "num_motifs": 2,
+    "compression_ratio": 0.8,
+    "timestamp": 1234567890
+  },
+  "compressed_size": 64,
+  "information_density": 0.038
+}
 ```
 
-### Batch Analysis
+## Dependencies
 
-```julia
-texts = [
-    "Alone in the desert.",
-    "Snake coils around memory.",
-    "Fragments of time scattered."
-]
+- **Symbolics.jl**: Symbolic computation and manipulation
+- **SymbolicNumericIntegration.jl**: Symbolic-numeric integration
+- **LinearAlgebra**: Vector operations and linear algebra
+- **StatsBase**: Statistical functions for entropy computation
+- **JSON3**: JSON serialization for output formatting
+- **DataFrames**: Data manipulation (optional)
 
-# Analyze all texts
-results = analyze_text_batch(texts)
+## Architecture
 
-# Compare results
-comparison = compare_analyses(results[1], results[2])
-println("Similarity: $(round(comparison["overall_similarity"], digits=3))")
+The Message Vectorizer follows a three-stage pipeline:
 
-# Distribution analysis
-distribution = analyze_motif_distribution(texts)
-println("Most common motif: $(distribution["most_common_motif"])")
-```
+1. **Motif Embedding**: Convert motif tokens into vector representations
+2. **Symbolic Compression**: Combine motifs into symbolic expressions
+3. **State Vectorization**: Convert symbolic states into consumable vectors
 
-### Custom Analysis
+### Symbolic Variables
 
-```julia
-# Detect specific motif types
-isolation_tokens = detect_motifs_by_type(text, ISOLATION)
-snake_tokens = detect_motifs_by_type(text, SNAKE)
+The system uses four primary symbolic variables:
+- `s`: State variable
+- `τ`: Temporal variable  
+- `μ`: Memory variable
+- `σ`: Spatial variable
 
-# Get motif statistics
-stats = calculate_motif_statistics(tokens)
-println("Average weight: $(stats["average_weight"])")
-
-# Analyze vector properties
-vector = vectorize_motifs(tokens)
-props = analyze_vector_properties(vector)
-println("Sparsity: $(props["sparsity"])")
-```
-
-## ⚙️ Configuration
-
-The system uses centralized configuration in `Config.jl`:
-
-```julia
-# Detection thresholds
-get_threshold("min_confidence")      # 0.3
-get_threshold("min_weight")          # 0.1
-get_threshold("coherence_threshold") # 0.5
-
-# Vector configuration
-get_vector_config("dimensions")      # 6
-get_vector_config("normalization")   # "l2"
-
-# Analysis configuration
-get_analysis_config("entropy_base")  # 2.0
-```
-
-## 🔧 Performance
-
-- **Optimized Algorithms**: Efficient motif detection and vectorization
-- **Memory Efficient**: Minimal memory footprint for large texts
-- **Batch Processing**: Parallel analysis of multiple texts
-- **Type Safety**: Compile-time error checking
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -243,24 +202,6 @@ get_analysis_config("entropy_base")  # 2.0
 4. Ensure all tests pass
 5. Submit a pull request
 
-## 📄 License
+## License
 
-MIT License - see LICENSE file for details.
-
-## 👨‍🔬 Authors
-
-Developed by [9xKi11] ai n satan
-
-Inspired by TA ULS theory, information entropy dynamics, and Kojima's symbolic narrative structures.
-
-## 🔗 Related Projects
-
-- **TA ULS**: Topology-Aware Uncertainty Learning Systems
-- **Julia Text Analysis**: Advanced text processing capabilities
-- **Information Theory**: Entropy and coherence analysis
-
----
-
-**Version**: 2.0.0  
-**Julia**: ≥1.6  
-**License**: MIT
+This project is licensed under the MIT License - see the LICENSE file for details.
