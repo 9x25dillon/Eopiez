@@ -1,0 +1,9 @@
+name = "JuliaRef"
+uuid = "12345678-90ab-cdef-1234-567890abcdef"
+authors = ["LIMPS"]
+version = "0.1.0"
+[deps]
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+JSON3 = "0f8b85d8-7281-11e9-16c0-615811a58b57"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+WebSockets = "104b5d7c-a370-577a-8038-80a2059c5097"
