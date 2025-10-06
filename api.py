@@ -24,6 +24,78 @@ app.mount("/ui", StaticFiles(directory=STATIC_DIR), name="ui")
 JULIA_BASE = os.environ.get("JULIA_BASE", "http://localhost:9000")
 
 QSESS: Dict[str, Dict[str, Any]] = {}
+def _motif_detect_local(texts: List[str]) -> List[dict]:
+    # Calls Julia motif server for detection
+    url = f"{JULIA_BASE}/motif/batch"
+    payload = {"documents": texts}
+    return httpx.post(url, json=payload, timeout=120.0).json().get("results", [])
+
+
+def _vectorize_tokens_local(tokens: List[dict], embedding_dim: int = 64,
+                            entropy_threshold: float = 0.5, compression_ratio: float = 0.8) -> dict:
+    url = f"{JULIA_BASE}/motif/vectorize"
+    payload = {
+        "motif_tokens": tokens,
+        "embedding_dim": int(embedding_dim),
+        "entropy_threshold": float(entropy_threshold),
+        "compression_ratio": float(compression_ratio),
+    }
+    return httpx.post(url, json=payload, timeout=120.0).json()
+
+
+def _score_contexts_with_motifs(contexts: List[dict], embedding_dim: int = 64) -> List[dict]:
+    # contexts: [{id, text}]
+    texts = [c.get("text", "") for c in contexts]
+    det = _motif_detect_local(texts)
+    results: List[dict] = []
+    for ctx, di in zip(contexts, det):
+        motif_tokens = di.get("motif_tokens", [])
+        vec = _vectorize_tokens_local(motif_tokens, embedding_dim=embedding_dim)
+        ms = vec.get("message_state", {})
+        score = float(ms.get("entropy_score", 0.0))
+        results.append({
+            "id": ctx.get("id"),
+            "text": ctx.get("text"),
+            "motif_report": di.get("document_analysis", {}),
+            "motif_tokens": motif_tokens,
+            "message_state": ms,
+            "explain": {
+                "top_motifs": sorted([
+                    (k, v.get("confidence", 0.0)) for k, v in di.get("document_analysis", {})
+                        .get("detected_motifs", {}).items()
+                ], key=lambda x: -x[1])[:5],
+                "entropy_score": score,
+                "information_density": ms.get("information_density")
+            }
+        })
+    return results
+
+
+@app.post("/dual/select_contexts")
+async def dual_select_contexts(payload: Dict[str, Any]) -> JSONResponse:
+    """Score candidate contexts using motif detection + vectorizer for dual-LLM selection.
+
+    Request:
+      {
+        "candidates": [{"id": "c1", "text": "..."}, ...],
+        "embedding_dim": 64
+      }
+    Response:
+      {
+        "ranked": [ { id, score, explain, message_state, motif_report }, ...]
+      }
+    """
+    cands = payload.get("candidates") or []
+    if not isinstance(cands, list) or not cands:
+        return JSONResponse({"error": "no candidates"}, status_code=400)
+    embd = int(payload.get("embedding_dim", 64))
+
+    # Run motif and vectorization scoring synchronously; small N typical.
+    results = _score_contexts_with_motifs(cands, embedding_dim=embd)
+    for r in results:
+        r["score"] = float(r.get("explain", {}).get("entropy_score", 0.0))
+    ranked = sorted(results, key=lambda x: -x["score"])
+    return JSONResponse({"ranked": ranked, "count": len(ranked)})
 
 
 @app.get("/", response_class=HTMLResponse)
