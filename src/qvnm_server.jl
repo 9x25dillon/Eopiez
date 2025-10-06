@@ -512,6 +512,20 @@ function handle_dp_summary(req::HTTP.Request)
 end
 HTTP.register!(router, "POST", "/dp/summary", handle_dp_summary)
 
+##############################
+# (F) Motif Detection + Vectorizer endpoints
+##############################
+# Integrate the Motif Detection HTTP handlers onto the same router so that the
+# Python API gateway can call them via JULIA_BASE.
+include("motif_detection/motif_server.jl")
+using .MotifServer
+
+HTTP.register!(router, "POST", "/motif/detect", MotifServer.motif_handler)
+HTTP.register!(router, "POST", "/motif/batch", MotifServer.batch_motif_handler)
+HTTP.register!(router, "POST", "/motif/vectorize", MotifServer.vectorize_motifs_handler)
+HTTP.register!(router, "GET",  "/motif/health", MotifServer.health_check_handler)
+HTTP.register!(router, "GET",  "/motif/metrics", MotifServer.metrics_handler)
+
 port = parse(Int, get(ENV,"PORT","9000"))
 println("PolyServe+QVNM on :$port")
 HTTP.serve(router, ip"0.0.0.0", port)
