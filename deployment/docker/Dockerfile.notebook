@@ -1,0 +1,36 @@
+FROM jupyter/scipy-notebook:latest
+
+USER root
+
+# Install additional system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+USER jovyan
+
+# Copy requirements
+COPY requirements.txt /tmp/requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+    pip install --no-cache-dir \
+    jupyter \
+    jupyterlab \
+    matplotlib \
+    seaborn \
+    plotly \
+    ipywidgets
+
+# Copy notebooks and source
+COPY examples/notebooks/ /home/jovyan/work/
+COPY src/ /home/jovyan/src/
+
+WORKDIR /home/jovyan/work
+
+# Expose Jupyter port
+EXPOSE 8888
+
+# Start JupyterLab
+CMD ["start-notebook.sh", "--NotebookApp.token=''", "--NotebookApp.password=''"]
