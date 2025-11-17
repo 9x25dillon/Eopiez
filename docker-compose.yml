@@ -1,0 +1,278 @@
+version: '3.8'
+
+services:
+  # ===========================================
+  # Infrastructure Services
+  # ===========================================
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: eopiez-postgres
+    environment:
+      POSTGRES_DB: eopiez
+      POSTGRES_USER: eopiez
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eopiez_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eopiez"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eopiez-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: eopiez-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eopiez-network
+
+  # ===========================================
+  # Core Backend Services
+  # ===========================================
+
+  julia-backend:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.julia
+    container_name: eopiez-julia
+    ports:
+      - "8080:8080"
+    environment:
+      JULIA_NUM_THREADS: ${JULIA_NUM_THREADS:-4}
+      JULIA_PORT: 8080
+    volumes:
+      - ./src:/app/src
+      - ./Project.toml:/app/Project.toml
+      - ./Manifest.toml:/app/Manifest.toml
+      - julia-depot:/root/.julia
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - eopiez-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.api
+    container_name: eopiez-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      # API Configuration
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_WORKERS: ${API_WORKERS:-4}
+
+      # Backend Services
+      JULIA_BACKEND_URL: http://julia-backend:8080
+      AL_ULS_BACKEND_URL: http://al-uls-service:8001
+
+      # Database
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: eopiez
+      POSTGRES_USER: eopiez
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eopiez_dev_password}
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+      # Model Cache
+      MODEL_CACHE_DIR: /models
+    volumes:
+      - ./api.py:/app/api.py
+      - ./src:/app/src
+      - ./requirements.txt:/app/requirements.txt
+      - model-cache:/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - eopiez-network
+    depends_on:
+      julia-backend:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  al-uls-service:
+    build:
+      context: ./al-uls-evolution
+      dockerfile: ../deployment/docker/Dockerfile.al-uls
+    container_name: eopiez-al-uls
+    ports:
+      - "8001:8001"
+    environment:
+      API_PORT: 8001
+      JULIA_BACKEND_URL: http://julia-backend:8080
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MODEL_CACHE_DIR: /models
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - ./al-uls-evolution:/app
+      - model-cache:/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - eopiez-network
+    depends_on:
+      julia-backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ===========================================
+  # Monitoring & Observability
+  # ===========================================
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eopiez-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deployment/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - eopiez-network
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eopiez-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: grafana-clock-panel
+    volumes:
+      - ./deployment/monitoring/grafana:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    networks:
+      - eopiez-network
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+
+  # ===========================================
+  # Development Tools
+  # ===========================================
+
+  notebook:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.notebook
+    container_name: eopiez-notebook
+    ports:
+      - "8888:8888"
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      API_GATEWAY_URL: http://api-gateway:8000
+    volumes:
+      - ./examples/notebooks:/home/jovyan/work
+      - ./src:/home/jovyan/src
+    networks:
+      - eopiez-network
+    depends_on:
+      - api-gateway
+    profiles:
+      - dev
+
+  # ===========================================
+  # Testing
+  # ===========================================
+
+  test:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.test
+    container_name: eopiez-test
+    environment:
+      API_GATEWAY_URL: http://api-gateway:8000
+      JULIA_BACKEND_URL: http://julia-backend:8080
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: eopiez_test
+      POSTGRES_USER: eopiez
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eopiez_dev_password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./tests:/app/tests
+      - ./src:/app/src
+      - ./api.py:/app/api.py
+    networks:
+      - eopiez-network
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    profiles:
+      - test
+
+# ===========================================
+# Networks
+# ===========================================
+
+networks:
+  eopiez-network:
+    driver: bridge
+    name: eopiez-network
+
+# ===========================================
+# Volumes
+# ===========================================
+
+volumes:
+  postgres-data:
+    name: eopiez-postgres-data
+  redis-data:
+    name: eopiez-redis-data
+  julia-depot:
+    name: eopiez-julia-depot
+  model-cache:
+    name: eopiez-model-cache
+  prometheus-data:
+    name: eopiez-prometheus-data
+  grafana-data:
+    name: eopiez-grafana-data
