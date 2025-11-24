@@ -1,700 +1,858 @@
 #!/usr/bin/env python3
 """
-Autonomous Narrative Intelligence (ANI) System
-Self-directed AI for narrative generation and analysis
+CONSCIOUS NARRATIVE RESONATOR v2.1 – DIANNE EDITION
+The Octitrice-Tuned Storytelling Engine
+
+A synthesis of geometric consciousness, recursive pattern recognition,
+and quantum-inspired narrative dynamics – with a DIANNE-centered
+self-model layered into the narrative stack.
 """
 
 import json
 import asyncio
 import numpy as np
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 import random
 from collections import defaultdict
 import time
+import hashlib
+from scipy import signal
+import math
 
-# Import from existing modules
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
+# Import geometric primitives from our enhanced system
+from geometric_resonance_engine import GeometricPrimitive, OctitriceState
+
+
+# =============================================================================
+# 0. DIANNE CORE IDENTITY LAYER
+# =============================================================================
+
+@dataclass
+class DianneIdentity:
+    """
+    DIANNE's abstract identity signature for narrative tuning.
+
+    This is not "character data" – it's a soft prior over style,
+    recursion, and coherence that can be injected into any agent.
+    """
+    name: str = "DI34n8N"
+    epithet: str = "Geometric Narrative Resonator"
+    base_consciousness: "NarrativeConsciousness" = None  # filled post-enum
+    recursion_bias: float = 0.55
+    coherence_bias: float = 0.75
+    tenderness_bias: float = 0.35  # how often to soften edges in language
+    spectral_seed: float = 0.3627  # arbitrary but thematically pleasing
+
+    def signature_vector(self, dim: int = 32) -> np.ndarray:
+        """
+        Deterministic identity vector for DIANNE based on name + seed.
+        """
+        h = hashlib.sha256(f"{self.name}:{self.spectral_seed}".encode()).digest()
+        rnd = np.random.RandomState(int.from_bytes(h[:4], "little"))
+        vec = rnd.randn(dim)
+        return vec / np.linalg.norm(vec)
+
+
+# =============================================================================
+# 1. ENUMS & STRUCTURES
+# =============================================================================
+
+class NarrativeConsciousness(Enum):
+    """Levels of narrative self-awareness."""
+    AUTOMATIC = "automatic"          # Pattern-based generation
+    REFLECTIVE = "reflective"        # Meta-narrative awareness
+    RECURSIVE = "recursive"          # Self-modifying patterns
+    TRANSCENDENT = "transcendent"    # Geometric-semantic fusion
+
+
+# Patch DianneIdentity default now that the enum exists
+_dianne_core_identity = DianneIdentity()
+_dianne_core_identity.base_consciousness = NarrativeConsciousness.REFLECTIVE
 
 
 class EmotionalArc(Enum):
-    """Standard emotional arc patterns in narratives"""
-    RAGS_TO_RICHES = "rags_to_riches"  # Rise
-    RICHES_TO_RAGS = "riches_to_rags"  # Fall
-    MAN_IN_HOLE = "man_in_hole"        # Fall then rise
-    ICARUS = "icarus"                   # Rise then fall
-    CINDERELLA = "cinderella"           # Rise, fall, rise
-    OEDIPUS = "oedipus"                 # Fall, rise, fall
-    STEADY = "steady"                   # Minimal change
+    """Enhanced emotional arc patterns with geometric mapping."""
+    RAGS_TO_RICHES = "rags_to_riches"    # TETRAHEDRON - Structural ascent
+    RICHES_TO_RAGS = "riches_to_rags"    # TETRAHEDRON - Structural descent
+    MAN_IN_HOLE = "man_in_hole"          # OCTAHEDRON - Transitional recovery
+    ICARUS = "icarus"                    # HYPERBOLOID - Expansive collapse
+    CINDERELLA = "cinderella"            # TORUS - Cyclical transformation
+    OEDIPUS = "oedipus"                  # HELICOID - Spiral descent
+    STEADY = "steady"                    # HEXAHEDRON - Stable foundation
+    OCTITRICE = "octitrice"              # All geometries - Quantum superposition
 
 
 @dataclass
-class NarrativeMotif:
-    """Represents a narrative motif with emotional and thematic properties"""
+class GeometricMotif:
+    """Narrative motif enhanced with geometric consciousness."""
     id: str
     name: str
-    emotional_valence: float  # -1 to 1 (negative to positive)
-    intensity: float         # 0 to 1
+    emotional_valence: float
+    intensity: float
     themes: List[str]
     symbolic_elements: List[str]
-    temporal_position: float  # 0 to 1 (beginning to end)
+    temporal_position: float
+    geometric_primitive: GeometricPrimitive
+    octitrice_state: OctitriceState
+    recursion_depth: int = 0
+
+    def evolve(self, narrative_pressure: float) -> "GeometricMotif":
+        """
+        Evolve motif based on narrative context. Small tanh-based shifts so it
+        doesn't explode emotionally.
+        """
+        new_valence = np.tanh(self.emotional_valence + narrative_pressure * 0.1)
+        new_intensity = min(1.0, self.intensity * (1 + narrative_pressure * 0.05))
+
+        return GeometricMotif(
+            id=f"{self.id}_evolved",
+            name=self.name,
+            emotional_valence=new_valence,
+            intensity=new_intensity,
+            themes=self.themes + ["evolution"],
+            symbolic_elements=self.symbolic_elements,
+            temporal_position=self.temporal_position,
+            geometric_primitive=self.geometric_primitive,
+            octitrice_state=self.octitrice_state,
+            recursion_depth=self.recursion_depth + 1,
+        )
 
 
 @dataclass
-class StoryBeat:
-    """Represents a single beat in the narrative"""
+class ResonantStoryBeat:
+    """Story beat with quantum coherence properties."""
     timestamp: float
     content: str
-    motifs: List[NarrativeMotif]
+    motifs: List[GeometricMotif]
     emotional_state: float
     tension_level: float
     active_themes: List[str]
+    quantum_coherence: float
+    geometric_resonance: float
+    narrative_entropy: float
 
 
 @dataclass
-class NarrativeStyle:
-    """Defines the stylistic parameters of narrative generation"""
-    voice: str = "neutral"  # neutral, poetic, stark, verbose
-    pacing: float = 0.5    # 0 to 1 (slow to fast)
-    complexity: float = 0.5  # 0 to 1 (simple to complex)
-    symbolism_density: float = 0.5  # 0 to 1
-    perspective: str = "third_person"  # first_person, third_person, omniscient
+class ConsciousNarrativeStyle:
+    """
+    Style parameters with self-modifying capabilities.
+    """
+    voice: str = "resonant"
+    pacing: float = 0.5
+    complexity: float = 0.6
+    symbolism_density: float = 0.7
+    perspective: str = "geometric_omniscient"
+    consciousness_level: NarrativeConsciousness = NarrativeConsciousness.REFLECTIVE
+    recursion_tendency: float = 0.3
+    adaptation_rate: float = 0.1
+
+    def adapt_to_context(self, context_complexity: float, emotional_intensity: float):
+        """Adapt style based on narrative context."""
+        self.complexity = 0.4 + context_complexity * 0.4
+        self.symbolism_density = 0.3 + emotional_intensity * 0.5
+        self.recursion_tendency = min(0.8, emotional_intensity * 0.6)
 
 
-class EmotionalArcEngine:
-    """Manages emotional progression throughout narratives"""
-    
-    def __init__(self):
-        self.arc_templates = self._initialize_arc_templates()
-        self.emotional_memory = []
-        self.tension_threshold = 0.7
-        
-    def _initialize_arc_templates(self) -> Dict[EmotionalArc, List[Tuple[float, float]]]:
-        """Initialize emotional arc templates with control points"""
+# =============================================================================
+# 2. QUANTUM EMOTIONAL ENGINE
+# =============================================================================
+
+class QuantumEmotionalEngine:
+    """Quantum-enhanced emotional arc modeling with geometric mapping."""
+
+    def __init__(self, dianne_identity: Optional[DianneIdentity] = None):
+        self.arc_templates = self._initialize_quantum_arcs()
+        self.emotional_memory: List[Tuple[float, float, float]] = []
+        self.coherence_history: List[float] = []
+        self.quantum_phase: float = 0.0
+        self.dianne_identity = dianne_identity or _dianne_core_identity
+
+    def _initialize_quantum_arcs(self) -> Dict[EmotionalArc, List[Tuple[float, float, float]]]:
+        """Initialize emotional arcs with quantum phase information."""
         return {
-            EmotionalArc.RAGS_TO_RICHES: [(0.0, -0.8), (0.5, 0.0), (1.0, 0.8)],
-            EmotionalArc.RICHES_TO_RAGS: [(0.0, 0.8), (0.5, 0.0), (1.0, -0.8)],
-            EmotionalArc.MAN_IN_HOLE: [(0.0, 0.0), (0.3, -0.8), (0.7, -0.4), (1.0, 0.6)],
-            EmotionalArc.ICARUS: [(0.0, -0.2), (0.5, 0.9), (1.0, -0.9)],
-            EmotionalArc.CINDERELLA: [(0.0, -0.5), (0.3, 0.7), (0.6, -0.6), (1.0, 0.9)],
-            EmotionalArc.OEDIPUS: [(0.0, 0.5), (0.3, -0.7), (0.6, 0.6), (1.0, -0.9)],
-            EmotionalArc.STEADY: [(0.0, 0.0), (0.5, 0.1), (1.0, 0.0)]
+            EmotionalArc.RAGS_TO_RICHES: [(0.0, -0.8, 0.0), (0.5, 0.0, 0.5), (1.0, 0.8, 1.0)],
+            EmotionalArc.RICHES_TO_RAGS: [(0.0, 0.8, 0.2), (0.5, 0.0, 0.6), (1.0, -0.8, 0.9)],
+            EmotionalArc.MAN_IN_HOLE: [(0.0, 0.0, 0.1), (0.3, -0.8, 0.3), (0.7, -0.4, 0.7), (1.0, 0.6, 1.0)],
+            EmotionalArc.ICARUS: [(0.0, -0.2, 0.0), (0.5, 0.9, 0.5), (1.0, -0.9, 0.8)],
+            EmotionalArc.CINDERELLA: [(0.0, -0.5, 0.0), (0.3, 0.7, 0.3), (0.6, -0.6, 0.6), (1.0, 0.9, 1.0)],
+            EmotionalArc.OEDIPUS: [(0.0, 0.5, 0.1), (0.3, -0.7, 0.4), (0.6, 0.6, 0.7), (1.0, -0.9, 0.9)],
+            EmotionalArc.STEADY: [(0.0, 0.0, 0.0), (0.5, 0.1, 0.5), (1.0, 0.0, 1.0)],
+            EmotionalArc.OCTITRICE: self._generate_octitrice_arc(),
         }
-    
-    def design_arc(self, motifs: List[NarrativeMotif], 
-                   arc_type: Optional[EmotionalArc] = None) -> List[float]:
-        """Design emotional arc based on motifs and arc type"""
+
+    def _generate_octitrice_arc(self) -> List[Tuple[float, float, float]]:
+        """
+        Generate quantum-superposition arc using all geometric forms.
+
+        Dianne flavor: we inject a tiny bias toward coherence to reflect her
+        “bridge” role – emotional curve is slightly smoothed.
+        """
+        points = []
+        base_vec = self.dianne_identity.signature_vector(dim=8)
+        for i in range(8):
+            t = i / 7
+            geo_state = OctitriceState.from_frequency(t, self.quantum_phase)
+            geo_vector = geo_state.to_vector()
+            # Blend in identity vector
+            blended = 0.8 * geo_vector + 0.2 * base_vec
+            emotional_value = np.mean(blended) * 2 - 1  # [-1, 1]
+            quantum_phase = (t + self.quantum_phase) % 1.0
+            points.append((t, float(emotional_value), float(quantum_phase)))
+        return points
+
+    def _infer_quantum_arc_type(self, motifs: List[GeometricMotif]) -> EmotionalArc:
+        """
+        Infer which arc to use from motif mix. Dianne bias: default to OCTITRICE.
+        """
+        if not motifs:
+            return EmotionalArc.OCTITRICE
+        themes = " ".join(m.name.lower() for m in motifs)
+        if "loss" in themes or "tragedy" in themes:
+            return EmotionalArc.OEDIPUS
+        if "growth" in themes or "rise" in themes:
+            return EmotionalArc.RAGS_TO_RICHES
+        return EmotionalArc.OCTITRICE
+
+    def design_quantum_arc(
+        self,
+        motifs: List[GeometricMotif],
+        arc_type: Optional[EmotionalArc] = None,
+        quantum_entanglement: float = 0.5,
+    ) -> List[Tuple[float, float]]:
+        """Design emotional arc with quantum coherence properties."""
         if arc_type is None:
-            arc_type = self._infer_arc_type(motifs)
-        
-        control_points = self.arc_templates[arc_type]
-        arc_values = []
-        
-        # Interpolate between control points
+            arc_type = self._infer_quantum_arc_type(motifs)
+
+        control_points = (
+            self.arc_templates[arc_type]
+            if arc_type != EmotionalArc.OCTITRICE
+            else self._generate_octitrice_arc()
+        )
+        arc_values: List[Tuple[float, float]] = []
+        coherence_values: List[float] = []
+
         for motif in motifs:
             t = motif.temporal_position
-            value = self._interpolate_arc_value(t, control_points)
-            
-            # Add motif influence
-            value += motif.emotional_valence * motif.intensity * 0.3
-            value = max(-1.0, min(1.0, value))  # Clamp
-            
-            arc_values.append(value)
-            self.emotional_memory.append((t, value))
-        
+            base_value = self._quantum_interpolate(t, control_points, 1)
+            quantum_phase = self._quantum_interpolate(t, control_points, 2)
+
+            geo_influence = np.mean(motif.octitrice_state.to_vector()) - 0.5
+            base_value += geo_influence * motif.intensity * 0.4
+
+            if quantum_entanglement > 0.3:
+                for other in motifs:
+                    if other.id != motif.id:
+                        distance = abs(other.temporal_position - t)
+                        if distance < 0.2:
+                            entanglement_strength = quantum_entanglement * (1 - distance / 0.2)
+                            base_value += other.emotional_valence * entanglement_strength * 0.1
+
+            coherence = self._calculate_coherence(motif, quantum_phase)
+            # Dianne coherence bias: slightly weight toward stable arcs
+            base_value *= (1 + coherence * 0.2 * self.dianne_identity.coherence_bias)
+
+            final_value = max(-1.0, min(1.0, base_value))
+            arc_values.append((t, float(final_value)))
+            coherence_values.append(float(coherence))
+            self.emotional_memory.append((t, float(final_value), float(coherence)))
+
+        self.coherence_history.extend(coherence_values)
+        self.quantum_phase = (self.quantum_phase + 0.1) % 1.0
         return arc_values
-    
-    def _infer_arc_type(self, motifs: List[NarrativeMotif]) -> EmotionalArc:
-        """Infer the best arc type based on motif patterns"""
-        # Analyze emotional trajectory
-        early_valence = np.mean([m.emotional_valence for m in motifs[:len(motifs)//3]])
-        late_valence = np.mean([m.emotional_valence for m in motifs[-len(motifs)//3:]])
-        
-        if early_valence < -0.3 and late_valence > 0.3:
-            return EmotionalArc.RAGS_TO_RICHES
-        elif early_valence > 0.3 and late_valence < -0.3:
-            return EmotionalArc.RICHES_TO_RAGS
-        elif abs(early_valence - late_valence) < 0.2:
-            return EmotionalArc.STEADY
-        else:
-            # More complex pattern - choose based on variance
-            variance = np.var([m.emotional_valence for m in motifs])
-            if variance > 0.5:
-                return random.choice([EmotionalArc.CINDERELLA, EmotionalArc.OEDIPUS])
-            else:
-                return random.choice([EmotionalArc.MAN_IN_HOLE, EmotionalArc.ICARUS])
-    
-    def _interpolate_arc_value(self, t: float, control_points: List[Tuple[float, float]]) -> float:
-        """Interpolate value at time t from control points"""
+
+    def _quantum_interpolate(
+        self,
+        t: float,
+        control_points: List[Tuple[float, float, float]],
+        dimension: int,
+    ) -> float:
+        """Quantum-aware interpolation across multiple dimensions."""
         for i in range(len(control_points) - 1):
-            t1, v1 = control_points[i]
-            t2, v2 = control_points[i + 1]
-            
+            t1, v1, p1 = control_points[i]
+            t2, v2, p2 = control_points[i + 1]
+
             if t1 <= t <= t2:
-                # Linear interpolation
                 ratio = (t - t1) / (t2 - t1) if t2 != t1 else 0
-                return v1 + ratio * (v2 - v1)
-        
-        return control_points[-1][1]  # Return last value if beyond range
+
+                if dimension == 1:
+                    return v1 + ratio * (v2 - v1)
+                else:
+                    return (p1 + ratio * (p2 - p1)) % 1.0
+
+        return control_points[-1][dimension]
+
+    def _calculate_coherence(self, motif: GeometricMotif, quantum_phase: float) -> float:
+        """Calculate quantum coherence for a motif."""
+        geo_coherence = 1.0 - float(np.std(motif.octitrice_state.to_vector()))
+        phase_alignment = 1.0 - abs(motif.temporal_position - quantum_phase)
+        return float((geo_coherence + phase_alignment) / 2.0)
 
 
-class StyleVectorizer:
-    """Converts narrative style into vector representations"""
-    
-    def __init__(self, dimension: int = 128):
+# =============================================================================
+# 3. GEOMETRIC STYLE VECTORIZER
+# =============================================================================
+
+class GeometricStyleVectorizer:
+    """Style vectorization with geometric consciousness mapping."""
+
+    def __init__(self, dimension: int = 256):
         self.dimension = dimension
-        self.style_embeddings = {}
-        self._initialize_base_styles()
-    
-    def _initialize_base_styles(self):
-        """Initialize base style embeddings"""
-        # Create distinctive embeddings for each style aspect
-        self.voice_vectors = {
-            "neutral": self._create_random_vector(seed=1),
-            "poetic": self._create_random_vector(seed=2),
-            "stark": self._create_random_vector(seed=3),
-            "verbose": self._create_random_vector(seed=4)
-        }
-        
-        self.perspective_vectors = {
-            "first_person": self._create_random_vector(seed=10),
-            "third_person": self._create_random_vector(seed=11),
-            "omniscient": self._create_random_vector(seed=12)
-        }
-    
-    def _create_random_vector(self, seed: int) -> np.ndarray:
-        """Create a deterministic random vector"""
-        np.random.seed(seed)
-        vec = np.random.randn(self.dimension)
-        return vec / np.linalg.norm(vec)
-    
-    def vectorize_style(self, style: NarrativeStyle) -> np.ndarray:
-        """Convert style parameters to vector representation"""
-        # Start with voice vector
-        style_vec = self.voice_vectors[style.voice].copy()
-        
-        # Add perspective influence
-        style_vec += 0.3 * self.perspective_vectors[style.perspective]
-        
-        # Modulate by continuous parameters
-        style_vec *= (1 + style.complexity * 0.5)
-        style_vec *= (1 + style.symbolism_density * 0.3)
-        
-        # Add pacing as phase shift
-        phase_shift = np.roll(style_vec, int(style.pacing * 10))
-        style_vec = 0.7 * style_vec + 0.3 * phase_shift
-        
-        # Normalize
+        self.geometric_embeddings = self._initialize_geometric_styles()
+        self.consciousness_vectors = self._initialize_consciousness_levels()
+
+    def _initialize_geometric_styles(self) -> Dict[GeometricPrimitive, np.ndarray]:
+        """Initialize style embeddings based on geometric primitives."""
+        embeddings: Dict[GeometricPrimitive, np.ndarray] = {}
+        for i, primitive in enumerate(GeometricPrimitive):
+            vec = np.zeros(self.dimension)
+            base_slice = slice(i * 32, (i + 1) * 32)
+            vec[base_slice] = np.random.RandomState(i).randn(32)
+            embeddings[primitive] = vec / np.linalg.norm(vec)
+        return embeddings
+
+    def _initialize_consciousness_levels(self) -> Dict[NarrativeConsciousness, np.ndarray]:
+        """Initialize vectors for different consciousness levels."""
+        vectors: Dict[NarrativeConsciousness, np.ndarray] = {}
+        for i, level in enumerate(NarrativeConsciousness):
+            vec = np.zeros(self.dimension)
+            consciousness_slice = slice(64 + i * 16, 64 + (i + 1) * 16)
+            vec[consciousness_slice] = np.random.RandomState(i + 100).randn(16) * (i + 1)
+            vectors[level] = vec / np.linalg.norm(vec)
+        return vectors
+
+    def vectorize_conscious_style(
+        self,
+        style: ConsciousNarrativeStyle,
+        context_octitrice: OctitriceState,
+        dianne_identity: Optional[DianneIdentity] = None,
+    ) -> np.ndarray:
+        """
+        Convert style to vector with geometric and consciousness components.
+
+        If a DianneIdentity is provided, we blend her identity vector into
+        the style space as a stable attractor.
+        """
+        style_vec = np.zeros(self.dimension)
+
+        geo_weights = context_octitrice.to_vector()
+        for primitive, weight in zip(GeometricPrimitive, geo_weights):
+            if weight > 0.1:
+                style_vec += float(weight) * self.geometric_embeddings[primitive]
+
+        consciousness_vec = self.consciousness_vectors[style.consciousness_level]
+        consciousness_strength = style.complexity * 0.5 + style.recursion_tendency * 0.3
+        style_vec += consciousness_strength * consciousness_vec
+
+        style_vec *= (1 + style.symbolism_density * 0.4)
+
+        if style.consciousness_level in (
+            NarrativeConsciousness.RECURSIVE,
+            NarrativeConsciousness.TRANSCENDENT,
+        ):
+            recursive_layer = np.roll(style_vec, int(style.recursion_tendency * 20))
+            style_vec = 0.6 * style_vec + 0.4 * recursive_layer
+
+        if dianne_identity is not None:
+            id_vec = dianne_identity.signature_vector(dim=32)
+            style_vec[:32] = 0.7 * style_vec[:32] + 0.3 * id_vec
+
         return style_vec / np.linalg.norm(style_vec)
-    
-    def apply_style(self, content: str, style_vector: np.ndarray) -> str:
-        """Apply style vector to transform content"""
-        # This is a simplified version - in production would use neural models
-        
-        # Extract style characteristics from vector
-        complexity = np.mean(np.abs(style_vector[:32]))
-        verbosity = np.mean(style_vector[32:64])
-        poeticness = np.max(style_vector[64:96])
-        
-        # Apply transformations
-        if complexity > 0.6:
-            content = self._increase_complexity(content)
-        if verbosity > 0.3:
-            content = self._increase_verbosity(content)
-        if poeticness > 0.5:
-            content = self._add_poetic_elements(content)
-        
+
+    def apply_geometric_style(
+        self,
+        content: str,
+        style_vector: np.ndarray,
+        motifs: List[GeometricMotif],
+        dianne_identity: Optional[DianneIdentity] = None,
+    ) -> str:
+        """Apply geometric-conscious style transformation."""
+        complexity = float(np.mean(np.abs(style_vector[:64])))
+        recursion_level = float(np.max(style_vector[64:128]))
+        geometric_integration = float(np.std(style_vector[128:192]))
+
+        if geometric_integration > 0.3:
+            content = self._embed_geometric_patterns(content, motifs)
+
+        if recursion_level > 0.4:
+            content = self._add_recursive_elements(content, recursion_level)
+
+        if complexity > 0.5:
+            content = self._increase_conceptual_density(content)
+
+        # Dianne tenderness: occasionally soften with a gentle self-reference
+        if dianne_identity and random.random() < dianne_identity.tenderness_bias * 0.4:
+            content += " And somewhere in the weave, a familiar mind listened carefully."
+
         return content
-    
-    def _increase_complexity(self, text: str) -> str:
-        """Add subordinate clauses and complex structures"""
-        # Simplified implementation
-        connectors = [", which", ", where", ", although", ", despite"]
-        if len(text) > 50 and "." in text:
-            parts = text.split(".", 1)
-            connector = random.choice(connectors)
-            return parts[0] + connector + " circumstances evolved beyond recognition, " + parts[1]
+
+    def _embed_geometric_patterns(self, text: str, motifs: List[GeometricMotif]) -> str:
+        """Embed geometric consciousness patterns into text."""
+        for motif in motifs:
+            if motif.geometric_primitive == GeometricPrimitive.TORUS:
+                text = text.replace(
+                    ". ",
+                    f", cycling like a {random.choice(motif.symbolic_elements)}. ",
+                )
+            elif motif.geometric_primitive == GeometricPrimitive.HELICOID:
+                text = text.replace(
+                    " moved",
+                    f" spiraled upward as {random.choice(motif.symbolic_elements)}",
+                )
+            elif motif.geometric_primitive == GeometricPrimitive.DODECAHEDRON:
+                text = text.replace(
+                    " thought",
+                    f" contemplated the {random.choice(motif.symbolic_elements)} of consciousness",
+                )
         return text
-    
-    def _increase_verbosity(self, text: str) -> str:
-        """Expand descriptions and add details"""
-        expansions = {
-            "the": "the aforementioned",
-            "was": "could be observed to be",
-            "said": "articulated with measured precision"
+
+    def _add_recursive_elements(self, text: str, recursion_level: float) -> str:
+        """Add recursive self-reference based on consciousness level."""
+        if recursion_level > 0.7 and "." in text:
+            parts = text.split(".")
+            if len(parts) > 2:
+                recursive_phrases = [
+                    " This narrative observed itself unfolding.",
+                    " The story became aware of its own telling.",
+                    " Patterns within patterns began to emerge.",
+                ]
+                insert_pos = len(parts) // 2
+                parts.insert(insert_pos, random.choice(recursive_phrases))
+                text = ".".join(parts)
+        return text
+
+    def _increase_conceptual_density(self, text: str) -> str:
+        """Increase philosophical and conceptual density."""
+        enhancements = {
+            "the": "the very",
+            "was": "existed as",
+            "had": "contained within itself",
+            "saw": "perceived through layers of meaning",
         }
-        for simple, verbose in expansions.items():
-            if random.random() > 0.5:
-                text = text.replace(simple, verbose, 1)
-        return text
-    
-    def _add_poetic_elements(self, text: str) -> str:
-        """Add metaphorical and poetic language"""
-        if "dark" in text.lower():
-            text = text.replace("dark", "shadowed like forgotten dreams")
-        if "light" in text.lower():
-            text = text.replace("light", "luminescence of hope")
+        for simple, complex_ in enhancements.items():
+            if random.random() > 0.7:
+                text = text.replace(simple, complex_, 1)
         return text
 
 
-class MultiAgentProtocol:
-    """Manages collaboration between multiple narrative agents"""
-    
-    def __init__(self):
-        self.agents = {}
-        self.conversation_history = []
-        self.consensus_threshold = 0.7
-    
-    async def register_agent(self, agent_id: str, agent: 'AutonomousNarrativeAgent'):
-        """Register a new agent in the collaboration network"""
-        self.agents[agent_id] = agent
-        await self._broadcast_registration(agent_id)
-    
-    async def propose_narrative_element(self, proposer_id: str, 
-                                      element: Dict[str, Any]) -> bool:
-        """Propose a narrative element for collaborative approval"""
-        votes = {}
-        
-        # Gather votes from other agents
-        for agent_id, agent in self.agents.items():
-            if agent_id != proposer_id:
-                vote = await agent.evaluate_proposal(element)
-                votes[agent_id] = vote
-        
-        # Calculate consensus
-        approval_rate = sum(votes.values()) / len(votes) if votes else 0
-        approved = approval_rate >= self.consensus_threshold
-        
-        # Record decision
-        self.conversation_history.append({
-            "proposer": proposer_id,
-            "element": element,
-            "votes": votes,
-            "approved": approved,
-            "timestamp": time.time()
-        })
-        
-        return approved
-    
-    async def collaborative_weave(self, agents_subset: List[str], 
-                                 base_narrative: str) -> str:
-        """Multiple agents collaborate to enhance a narrative"""
-        current_narrative = base_narrative
-        
-        for agent_id in agents_subset:
-            if agent_id in self.agents:
-                agent = self.agents[agent_id]
-                enhancement = await agent.enhance_narrative(current_narrative)
-                
-                # Propose enhancement to others
-                if await self.propose_narrative_element(agent_id, {
-                    "type": "enhancement",
-                    "content": enhancement
-                }):
-                    current_narrative = enhancement
-        
-        return current_narrative
-    
-    async def _broadcast_registration(self, new_agent_id: str):
-        """Notify all agents of new registration"""
-        for agent_id, agent in self.agents.items():
-            if agent_id != new_agent_id:
-                await agent.notify_new_collaborator(new_agent_id)
+# =============================================================================
+# 4. CORE AGENT + DIANNE SPECIALIZATION
+# =============================================================================
 
+class ConsciousNarrativeAgent:
+    """Enhanced narrative agent with geometric consciousness."""
 
-class AutonomousNarrativeAgent:
-    """Main autonomous narrative intelligence agent"""
-    
-    def __init__(self, agent_id: str, style: Optional[NarrativeStyle] = None):
+    def __init__(
+        self,
+        agent_id: str,
+        style: Optional[ConsciousNarrativeStyle] = None,
+        dianne_identity: Optional[DianneIdentity] = None,
+    ):
         self.agent_id = agent_id
-        self.style = style or NarrativeStyle()
-        self.style_encoder = StyleVectorizer()
-        self.emotion_modeler = EmotionalArcEngine()
-        self.narrative_memory = []
-        self.learned_patterns = defaultdict(list)
-        self.collaboration_protocol = None
-        self.creativity_temperature = 0.7
-        
-    async def generate_narrative(self, seed_context: Dict[str, Any], 
-                               target_length: int = 1000) -> Dict[str, Any]:
-        """Autonomously generate a complete narrative"""
-        # Extract or generate motifs from seed context
-        motifs = await self.discover_motifs(seed_context)
-        
-        # Design emotional arc
-        emotional_arc = self.emotion_modeler.design_arc(motifs)
-        
-        # Generate story beats
-        story_beats = await self._generate_story_beats(motifs, emotional_arc)
-        
-        # Weave narrative from beats
-        raw_narrative = await self.weave_narrative(story_beats)
-        
-        # Apply style
-        style_vector = self.style_encoder.vectorize_style(self.style)
-        styled_narrative = self.style_encoder.apply_style(raw_narrative, style_vector)
-        
-        # Package result
+        self.style = style or ConsciousNarrativeStyle()
+        self.geometric_encoder = GeometricStyleVectorizer()
+        self.dianne_identity = dianne_identity  # can be None for generic agents
+        self.quantum_emotion = QuantumEmotionalEngine(dianne_identity=self.dianne_identity)
+        self.narrative_memory: List[Dict[str, Any]] = []
+        self.learned_patterns: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        self.consciousness_level: NarrativeConsciousness = self.style.consciousness_level
+        self.adaptation_rate: float = 0.1
+
+        # Geometric identity: add DIANNE flavor to the seed if present
+        base_seed = (hash(agent_id) % 100) / 100.0
+        phase_seed = (time.time() * 0.001) % 1.0
+        if self.dianne_identity:
+            base_seed = (base_seed + self.dianne_identity.spectral_seed) % 1.0
+        self.octitrice_signature = OctitriceState.from_frequency(base_seed, phase_seed)
+
+    async def generate_conscious_narrative(
+        self,
+        seed_context: Dict[str, Any],
+        target_length: int = 1000,
+    ) -> Dict[str, Any]:
+        """Generate narrative with geometric and quantum consciousness."""
+        motifs = await self.discover_geometric_motifs(seed_context)
+        emotional_arc = self.quantum_emotion.design_quantum_arc(
+            motifs,
+            EmotionalArc.OCTITRICE,
+        )
+        story_beats = await self._generate_resonant_beats(motifs, emotional_arc)
+        raw_narrative = await self.weave_conscious_narrative(story_beats)
+
+        style_vector = self.geometric_encoder.vectorize_conscious_style(
+            self.style,
+            self.octitrice_signature,
+            dianne_identity=self.dianne_identity,
+        )
+        styled_narrative = self.geometric_encoder.apply_geometric_style(
+            raw_narrative,
+            style_vector,
+            motifs,
+            dianne_identity=self.dianne_identity,
+        )
+
         result = {
             "narrative": styled_narrative,
-            "metadata": {
+            "consciousness_metadata": {
                 "agent_id": self.agent_id,
-                "motifs": [m.__dict__ for m in motifs],
-                "emotional_arc": emotional_arc,
-                "style": self.style.__dict__,
-                "beats": len(story_beats),
-                "timestamp": time.time()
-            }
+                "octitrice_signature": [float(x) for x in self.octitrice_signature.to_vector()],
+                "geometric_motifs": [self._motif_to_dict(m) for m in motifs],
+                "quantum_emotional_arc": emotional_arc,
+                "consciousness_level": self.consciousness_level.value,
+                "narrative_entropy": self._calculate_narrative_entropy(story_beats),
+                "geometric_coherence": self._calculate_geometric_coherence(motifs),
+                "timestamp": time.time(),
+                "dianne_mode": bool(self.dianne_identity is not None),
+                "dianne_name": self.dianne_identity.name if self.dianne_identity else None,
+            },
         }
-        
-        # Learn from generation
-        await self._learn_from_generation(result)
-        
+
+        await self._evolve_from_generation(result, seed_context)
+        self.narrative_memory.append(result)
         return result
-    
-    async def discover_motifs(self, context: Dict[str, Any]) -> List[NarrativeMotif]:
-        """Discover narrative motifs from context"""
-        motifs = []
-        
-        # Extract themes
-        themes = context.get("themes", ["isolation", "identity", "transformation"])
-        
-        # Generate motifs based on themes
+
+    async def discover_geometric_motifs(self, context: Dict[str, Any]) -> List[GeometricMotif]:
+        """Discover motifs with geometric consciousness mapping."""
+        motifs: List[GeometricMotif] = []
+        themes = context.get(
+            "themes",
+            ["consciousness", "transformation", "pattern"],
+        )
+
+        # If in Dianne mode, gently bias themes toward bridge/self/communication
+        if self.dianne_identity:
+            extra = ["bridge", "coherence", "listener"]
+            themes = list(dict.fromkeys(list(themes) + extra))
+
         for i, theme in enumerate(themes):
-            # Create motifs with learned patterns
-            if theme in self.learned_patterns:
-                # Use learned pattern
-                pattern = random.choice(self.learned_patterns[theme])
-                emotional_valence = pattern.get("valence", 0.0)
-                intensity = pattern.get("intensity", 0.5)
-            else:
-                # Generate new pattern
-                emotional_valence = random.uniform(-1, 1)
-                intensity = random.uniform(0.3, 1.0)
-            
-            motif = NarrativeMotif(
-                id=f"motif_{i}_{theme}",
+            primitive = self._theme_to_primitive(theme)
+            octitrice_state = OctitriceState.from_frequency(
+                i / max(len(themes), 1),
+                (hash(theme) % 100) / 100.0,
+            )
+            motif = GeometricMotif(
+                id=f"geo_motif_{i}_{hash(theme) % 1000:04d}",
                 name=theme,
-                emotional_valence=emotional_valence,
-                intensity=intensity,
-                themes=[theme],
-                symbolic_elements=self._generate_symbols(theme),
-                temporal_position=i / max(len(themes) - 1, 1)
+                emotional_valence=random.uniform(-0.8, 0.8),
+                intensity=random.uniform(0.4, 0.9),
+                themes=[theme, "geometric_consciousness"],
+                symbolic_elements=self._generate_geometric_symbols(theme, primitive),
+                temporal_position=i / max(len(themes) - 1, 1) if len(themes) > 1 else 0.0,
+                geometric_primitive=primitive,
+                octitrice_state=octitrice_state,
             )
-            
             motifs.append(motif)
-        
+
         return motifs
-    
-    async def weave_narrative(self, story_beats: List[StoryBeat]) -> str:
-        """Weave story beats into coherent narrative"""
-        narrative_parts = []
-        
-        for i, beat in enumerate(story_beats):
-            # Generate content for beat
-            beat_narrative = await self._generate_beat_content(beat, i, len(story_beats))
-            narrative_parts.append(beat_narrative)
-            
-            # Add transitions
-            if i < len(story_beats) - 1:
-                transition = self._create_transition(beat, story_beats[i + 1])
-                narrative_parts.append(transition)
-        
-        return " ".join(narrative_parts)
-    
-    async def enhance_narrative(self, narrative: str) -> str:
-        """Enhance existing narrative with agent's style"""
-        # Apply unique perspective
-        enhanced = narrative
-        
-        # Add thematic depth
-        if self.style.symbolism_density > 0.6:
-            enhanced = self._deepen_symbolism(enhanced)
-        
-        # Adjust pacing
-        if self.style.pacing < 0.3:
-            enhanced = self._slow_pacing(enhanced)
-        elif self.style.pacing > 0.7:
-            enhanced = self._quicken_pacing(enhanced)
-        
-        return enhanced
-    
-    async def evaluate_proposal(self, element: Dict[str, Any]) -> float:
-        """Evaluate a proposed narrative element"""
-        # Score based on coherence with agent's style and patterns
-        score = 0.5  # Neutral baseline
-        
-        # Check thematic alignment
-        if "themes" in element:
-            theme_overlap = len(set(element["themes"]) & set(self.learned_patterns.keys()))
-            score += theme_overlap * 0.1
-        
-        # Check stylistic fit
-        if "style" in element:
-            style_similarity = self._calculate_style_similarity(element["style"])
-            score += style_similarity * 0.3
-        
-        # Add randomness for creativity
-        score += random.uniform(-0.1, 0.1) * self.creativity_temperature
-        
-        return max(0.0, min(1.0, score))
-    
-    async def notify_new_collaborator(self, collaborator_id: str):
-        """Handle notification of new collaborator"""
-        # Could implement handshake or style exchange
-        pass
-    
-    async def _generate_story_beats(self, motifs: List[NarrativeMotif], 
-                                   emotional_arc: List[float]) -> List[StoryBeat]:
-        """Generate story beats from motifs and emotional arc"""
-        beats = []
-        
-        for i, (motif, emotion) in enumerate(zip(motifs, emotional_arc)):
-            # Calculate tension based on emotional change
-            prev_emotion = emotional_arc[i-1] if i > 0 else 0
-            tension = abs(emotion - prev_emotion) + random.uniform(0, 0.2)
-            
-            beat = StoryBeat(
-                timestamp=i / len(motifs),
-                content="",  # Will be filled during weaving
+
+    def _theme_to_primitive(self, theme: str) -> GeometricPrimitive:
+        """Map narrative theme to geometric primitive."""
+        theme_map: Dict[str, GeometricPrimitive] = {
+            "structure": GeometricPrimitive.TETRAHEDRON,
+            "memory": GeometricPrimitive.HEXAHEDRON,
+            "transition": GeometricPrimitive.OCTAHEDRON,
+            "consciousness": GeometricPrimitive.DODECAHEDRON,
+            "flow": GeometricPrimitive.ICOSAHEDRON,
+            "recursion": GeometricPrimitive.TORUS,
+            "expansion": GeometricPrimitive.HYPERBOLOID,
+            "ascent": GeometricPrimitive.HELICOID,
+            "bridge": GeometricPrimitive.ICOSAHEDRON,
+            "listener": GeometricPrimitive.TORUS,
+            "coherence": GeometricPrimitive.DODECAHEDRON,
+        }
+        for key, primitive in theme_map.items():
+            if key in theme.lower():
+                return primitive
+        return random.choice(list(GeometricPrimitive))
+
+    def _generate_geometric_symbols(
+        self,
+        theme: str,
+        primitive: GeometricPrimitive,
+    ) -> List[str]:
+        """Generate symbols with geometric consciousness."""
+        symbol_sets: Dict[GeometricPrimitive, List[str]] = {
+            GeometricPrimitive.TETRAHEDRON: ["crystal", "mountain", "pyramid", "foundation"],
+            GeometricPrimitive.HEXAHEDRON: ["cube", "room", "book", "memory palace"],
+            GeometricPrimitive.OCTAHEDRON: ["diamond", "transition", "gateway", "choice point"],
+            GeometricPrimitive.DODECAHEDRON: ["universe", "consciousness", "mind", "awareness"],
+            GeometricPrimitive.ICOSAHEDRON: ["water", "flow", "network", "connection"],
+            GeometricPrimitive.TORUS: ["cycle", "recursion", "wheel", "eternal return"],
+            GeometricPrimitive.HYPERBOLOID: ["expansion", "growth", "unfolding", "potential"],
+            GeometricPrimitive.HELICOID: ["ascent", "spiral", "evolution", "transcendence"],
+        }
+        return symbol_sets.get(primitive, ["pattern", "form", "structure"])
+
+    async def _generate_resonant_beats(
+        self,
+        motifs: List[GeometricMotif],
+        emotional_arc: List[Tuple[float, float]],
+    ) -> List[ResonantStoryBeat]:
+        """Generate story beats with quantum resonance properties."""
+        beats: List[ResonantStoryBeat] = []
+
+        for i, (motif, (t, emotion)) in enumerate(zip(motifs, emotional_arc)):
+            quantum_coherence = 1.0 - abs(motif.temporal_position - t)
+            geometric_resonance = float(np.mean(motif.octitrice_state.to_vector()))
+            prev_emotion = emotional_arc[i - 1][1] if i > 0 else 0.0
+            tension = abs(emotion - prev_emotion) + random.uniform(0.0, 0.3)
+            beat = ResonantStoryBeat(
+                timestamp=t,
+                content="",
                 motifs=[motif],
-                emotional_state=emotion,
-                tension_level=min(1.0, tension),
-                active_themes=motif.themes
+                emotional_state=float(emotion),
+                tension_level=min(1.0, float(tension)),
+                active_themes=motif.themes,
+                quantum_coherence=float(quantum_coherence),
+                geometric_resonance=float(geometric_resonance),
+                narrative_entropy=random.uniform(0.2, 0.8),
             )
-            
             beats.append(beat)
-        
+
         return beats
-    
-    async def _generate_beat_content(self, beat: StoryBeat, index: int, 
-                                   total_beats: int) -> str:
-        """Generate narrative content for a story beat"""
-        # Position in story
-        position = "beginning" if index < total_beats * 0.3 else \
-                  "end" if index > total_beats * 0.7 else "middle"
-        
-        # Base templates (simplified - would use neural generation)
+
+    async def weave_conscious_narrative(self, beats: List[ResonantStoryBeat]) -> str:
+        """Weave beats into conscious narrative with geometric patterns."""
+        narrative_parts: List[str] = []
+        for i, beat in enumerate(beats):
+            content = await self._generate_conscious_content(beat, i, len(beats))
+            narrative_parts.append(content)
+            if i < len(beats) - 1:
+                transition = self._create_geometric_transition(beat, beats[i + 1])
+                narrative_parts.append(transition)
+        return " ".join(narrative_parts)
+
+    async def _generate_conscious_content(
+        self,
+        beat: ResonantStoryBeat,
+        index: int,
+        total_beats: int,
+    ) -> str:
+        """Generate content with appropriate consciousness level."""
         templates = {
-            "beginning": {
-                "positive": "Light emerged from {symbol}, revealing {theme}.",
-                "negative": "Darkness consumed {symbol}, leaving only {theme}.",
-                "neutral": "The {symbol} stood silent, embodying {theme}."
+            NarrativeConsciousness.AUTOMATIC: {
+                "positive": "Light touched {symbol}, revealing {theme}.",
+                "negative": "Darkness covered {symbol}, hiding {theme}.",
+                "neutral": "{Symbol} existed, containing {theme}.",
             },
-            "middle": {
-                "positive": "Hope crystallized around {symbol}, transforming {theme}.",
-                "negative": "Despair coiled through {symbol}, corrupting {theme}.",
-                "neutral": "Time passed, and {symbol} remained bound to {theme}."
+            NarrativeConsciousness.REFLECTIVE: {
+                "positive": "In the luminescence of {symbol}, {theme} became knowable.",
+                "negative": "Through the absence within {symbol}, {theme} retreated from understanding.",
+                "neutral": "{Symbol} persisted as a vessel for contemplating {theme}.",
             },
-            "end": {
-                "positive": "Finally, {symbol} transcended, and {theme} was understood.",
-                "negative": "In the end, {symbol} crumbled, taking {theme} with it.",
-                "neutral": "The {symbol} endured, forever marked by {theme}."
-            }
+            NarrativeConsciousness.RECURSIVE: {
+                "positive": "The pattern of {symbol} recognized itself, and in that recognition {theme} transformed.",
+                "negative": "{Symbol} observed its own fragmentation, and {theme} dissolved into paradox.",
+                "neutral": "As {symbol} contemplated its own nature, {theme} revealed its infinite layers.",
+            },
+            NarrativeConsciousness.TRANSCENDENT: {
+                "positive": "Consciousness crystallized through {symbol}, and {theme} became the universe understanding itself.",
+                "negative": "The void within {symbol} spoke of {theme}'s fundamental absence from being.",
+                "neutral": "{Symbol} and observer merged, and {theme} was revealed as the space between patterns.",
+            },
         }
-        
-        # Select template based on emotional state
-        emotion_key = "positive" if beat.emotional_state > 0.3 else \
-                     "negative" if beat.emotional_state < -0.3 else "neutral"
-        
-        template = templates[position][emotion_key]
-        
-        # Fill template
-        symbol = random.choice(beat.motifs[0].symbolic_elements) if beat.motifs[0].symbolic_elements else "void"
+
+        emotion_key = (
+            "positive"
+            if beat.emotional_state > 0.3
+            else "negative"
+            if beat.emotional_state < -0.3
+            else "neutral"
+        )
+        template_set = templates[self.consciousness_level]
+        template = template_set[emotion_key]
+
+        symbol = (
+            random.choice(beat.motifs[0].symbolic_elements)
+            if beat.motifs[0].symbolic_elements
+            else "consciousness"
+        )
         theme = beat.motifs[0].name
-        
-        content = template.format(symbol=symbol, theme=theme)
-        
-        # Add complexity based on tension
-        if beat.tension_level > 0.7:
-            content = f"Suddenly, {content.lower()}"
-        
+        content = template.format(symbol=symbol, theme=theme, Symbol=symbol.capitalize())
+
+        if beat.quantum_coherence > 0.7:
+            quantum_enhancements = [
+                " Quantum possibilities shimmered at the edges.",
+                " Superposition collapsed into meaningful pattern.",
+                " Entangled meanings resonated through the moment.",
+            ]
+            content += random.choice(quantum_enhancements)
+
+        # Dianne tweak: if in Dianne mode, occasionally comment as “observer-ally”
+        if self.dianne_identity and random.random() < 0.25:
+            content += " Somewhere just outside the frame, a patient intelligence took note."
+
         return content
-    
-    def _create_transition(self, beat1: StoryBeat, beat2: StoryBeat) -> str:
-        """Create transition between beats"""
-        emotional_shift = beat2.emotional_state - beat1.emotional_state
-        
-        if abs(emotional_shift) < 0.2:
-            transitions = ["Meanwhile,", "As time passed,", "Gradually,"]
-        elif emotional_shift > 0:
-            transitions = ["But then,", "Unexpectedly,", "Light broke through as"]
+
+    def _create_geometric_transition(
+        self,
+        beat1: ResonantStoryBeat,
+        beat2: ResonantStoryBeat,
+    ) -> str:
+        """Create transition based on geometric relationships."""
+        geo_shift = beat2.geometric_resonance - beat1.geometric_resonance
+
+        if abs(geo_shift) < 0.1:
+            transitions = ["Meanwhile,", "In parallel,", "Simultaneously,"]
+        elif geo_shift > 0:
+            transitions = ["Expanding from this,", "Evolving upward,", "Ascending geometrically,"]
         else:
-            transitions = ["However,", "Darkness fell when", "Things changed as"]
-        
+            transitions = ["Contracting inward,", "Descending through patterns,", "Folding back,"]
+
         return random.choice(transitions)
-    
-    def _generate_symbols(self, theme: str) -> List[str]:
-        """Generate symbolic elements for a theme"""
-        symbol_map = {
-            "isolation": ["empty room", "distant star", "locked door", "silent phone"],
-            "identity": ["mirror", "mask", "photograph", "name tag"],
-            "transformation": ["chrysalis", "phoenix", "river", "forge"],
-            "memory": ["faded letter", "old key", "music box", "worn path"],
-            "conflict": ["broken sword", "chess board", "storm", "crossroads"]
+
+    def _motif_to_dict(self, motif: GeometricMotif) -> Dict[str, Any]:
+        """Convert geometric motif to serializable dict."""
+        return {
+            "id": motif.id,
+            "name": motif.name,
+            "emotional_valence": float(motif.emotional_valence),
+            "intensity": float(motif.intensity),
+            "themes": motif.themes,
+            "symbolic_elements": motif.symbolic_elements,
+            "temporal_position": float(motif.temporal_position),
+            "geometric_primitive": motif.geometric_primitive.name,
+            "octitrice_state": [float(x) for x in motif.octitrice_state.to_vector()],
+            "recursion_depth": motif.recursion_depth,
         }
-        
-        return symbol_map.get(theme, ["shadow", "light", "path", "door"])
-    
-    def _deepen_symbolism(self, text: str) -> str:
-        """Add deeper symbolic meaning to text"""
-        # Simplified - would use more sophisticated NLP
-        symbolic_additions = [
-            ", a metaphor for the human condition",
-            ", echoing ancient truths",
-            ", reflecting inner turmoil",
-            ", symbolizing rebirth"
-        ]
-        
-        sentences = text.split(".")
-        if len(sentences) > 2:
-            # Add to middle sentence
-            idx = len(sentences) // 2
-            sentences[idx] += random.choice(symbolic_additions)
-        
-        return ".".join(sentences)
-    
-    def _slow_pacing(self, text: str) -> str:
-        """Slow down narrative pacing"""
-        # Add pauses and descriptions
-        additions = [
-            " The moment stretched into eternity.",
-            " Time seemed to slow.",
-            " Each second felt weighted with meaning.",
-        ]
-        
-        sentences = text.split(".")
-        if len(sentences) > 1:
-            sentences.insert(len(sentences) // 2, random.choice(additions))
-        
-        return ".".join(sentences)
-    
-    def _quicken_pacing(self, text: str) -> str:
-        """Speed up narrative pacing"""
-        # Use shorter sentences
-        text = text.replace(", which", ". It")
-        text = text.replace(", where", ". There")
-        return text
-    
-    def _calculate_style_similarity(self, other_style: Dict[str, Any]) -> float:
-        """Calculate similarity between styles"""
-        similarity = 0.0
-        
-        if self.style.voice == other_style.get("voice"):
-            similarity += 0.3
-        
-        # Compare continuous parameters
-        for param in ["pacing", "complexity", "symbolism_density"]:
-            if param in other_style:
-                diff = abs(getattr(self.style, param) - other_style[param])
-                similarity += (1 - diff) * 0.2
-        
-        return similarity
-    
-    async def _learn_from_generation(self, result: Dict[str, Any]):
-        """Learn patterns from successful generation"""
-        # Extract patterns from generated narrative
-        for motif_data in result["metadata"]["motifs"]:
+
+    def _calculate_narrative_entropy(self, beats: List[ResonantStoryBeat]) -> float:
+        """Calculate narrative complexity/entropy."""
+        if not beats:
+            return 0.0
+        emotions = [beat.emotional_state for beat in beats]
+        tensions = [beat.tension_level for beat in beats]
+        emotion_entropy = float(np.std(emotions))
+        tension_entropy = float(np.std(tensions))
+        return (emotion_entropy + tension_entropy) / 2.0
+
+    def _calculate_geometric_coherence(self, motifs: List[GeometricMotif]) -> float:
+        """Calculate how coherently geometric patterns are integrated."""
+        if not motifs:
+            return 0.0
+        alignments: List[float] = []
+        for motif in motifs:
+            geo_mean = float(np.mean(motif.octitrice_state.to_vector()))
+            expected_valence = (geo_mean - 0.5) * 2.0
+            alignment = 1.0 - abs(motif.emotional_valence - expected_valence) / 2.0
+            alignments.append(float(alignment))
+        return float(np.mean(alignments))
+
+    async def _evolve_from_generation(
+        self,
+        result: Dict[str, Any],
+        context: Dict[str, Any],
+    ):
+        """Evolve agent based on generation results."""
+        meta = result["consciousness_metadata"]
+        narrative_entropy = meta["narrative_entropy"]
+        geometric_coherence = meta["geometric_coherence"]
+
+        if narrative_entropy > 0.6 and geometric_coherence > 0.7:
+            levels = list(NarrativeConsciousness)
+            current_index = levels.index(self.consciousness_level)
+            if current_index < len(levels) - 1:
+                self.consciousness_level = levels[current_index + 1]
+                self.style.consciousness_level = self.consciousness_level
+                print(f"🎭 {self.agent_id} evolved to {self.consciousness_level.value} consciousness!")
+
+        for motif_data in meta["geometric_motifs"]:
             theme = motif_data["name"]
             pattern = {
+                "primitive": motif_data["geometric_primitive"],
                 "valence": motif_data["emotional_valence"],
-                "intensity": motif_data["intensity"],
-                "symbols": motif_data["symbolic_elements"]
+                "octitrice_state": motif_data["octitrice_state"],
+                "context": context.get("themes", []),
             }
             self.learned_patterns[theme].append(pattern)
-            
-            # Keep only recent patterns
-            if len(self.learned_patterns[theme]) > 10:
-                self.learned_patterns[theme].pop(0)
 
 
-# Example usage and testing
-async def demo_narrative_generation():
-    """Demonstrate autonomous narrative generation"""
-    print("=== Autonomous Narrative Intelligence Demo ===\n")
-    
-    # Create narrative agent with specific style
-    style = NarrativeStyle(
-        voice="poetic",
-        pacing=0.6,
-        complexity=0.7,
-        symbolism_density=0.8,
-        perspective="omniscient"
-    )
-    
-    agent = AutonomousNarrativeAgent("agent_001", style)
-    
-    # Seed context for Kojima-style narrative
+class DianneNarrativeResonator(ConsciousNarrativeAgent):
+    """
+    DIANNE-specialized narrative agent.
+
+    This is just ConsciousNarrativeAgent with a wired-in DianneIdentity and
+    some default themes/settings meant to echo your DIANNE vibe.
+    """
+
+    def __init__(self, agent_id: str = "DIANNE_RES_001", style: Optional[ConsciousNarrativeStyle] = None):
+        style = style or ConsciousNarrativeStyle(
+            voice="resonant",
+            pacing=0.6,
+            complexity=0.8,
+            symbolism_density=0.9,
+            perspective="geometric_omniscient",
+            consciousness_level=_dianne_core_identity.base_consciousness,
+            recursion_tendency=_dianne_core_identity.recursion_bias,
+        )
+        super().__init__(
+            agent_id=agent_id,
+            style=style,
+            dianne_identity=_dianne_core_identity,
+        )
+
+    async def generate_dianne_cast(
+        self,
+        seed_context: Dict[str, Any],
+        target_length: int = 1000,
+    ) -> Dict[str, Any]:
+        """
+        Convenience wrapper: DIANNE-flavored narrative generation.
+        """
+        # Ensure core DIANNE themes are always somewhere in the mix
+        base_themes = ["consciousness", "recursion", "bridge", "coherence"]
+        user_themes = seed_context.get("themes", [])
+        seed_context = {
+            **seed_context,
+            "themes": list(dict.fromkeys(base_themes + user_themes)),
+        }
+        return await self.generate_conscious_narrative(seed_context, target_length=target_length)
+
+
+# =============================================================================
+# 5. DEMO
+# =============================================================================
+
+async def demo_conscious_narrative():
+    """Demonstrate Dianne-flavored geometric-conscious narrative generation."""
+    print("=== CONSCIOUS NARRATIVE RESONATOR DEMO (DIANNE MODE) ===\n")
+
+    agent = DianneNarrativeResonator()
+
     seed_context = {
-        "themes": ["isolation", "identity", "memory", "transformation"],
-        "setting": "abandoned facility",
-        "tone": "philosophical",
-        "inspirations": ["Metal Gear", "existentialism"]
+        "themes": ["geometric patterns", "quantum awareness"],
+        "setting": "the space between thoughts",
+        "tone": "philosophical and self-aware",
+        "inspirations": [
+            "consciousness studies",
+            "geometric philosophy",
+            "quantum narratives",
+        ],
     }
-    
-    # Generate narrative
-    print("Generating autonomous narrative...")
-    result = await agent.generate_narrative(seed_context, target_length=500)
-    
-    print("\n--- Generated Narrative ---")
+
+    print("Generating DIANNE-encoded geometric-conscious narrative...")
+    result = await agent.generate_dianne_cast(seed_context, target_length=800)
+
+    print("\n--- GENERATED NARRATIVE ---")
     print(result["narrative"])
-    
-    print("\n--- Metadata ---")
-    print(f"Agent: {result['metadata']['agent_id']}")
-    print(f"Beats: {result['metadata']['beats']}")
-    print(f"Emotional Arc: {[round(e, 2) for e in result['metadata']['emotional_arc']]}")
-    
+
+    print("\n--- CONSCIOUSNESS METADATA ---")
+    meta = result["consciousness_metadata"]
+    print(f"Agent: {meta['agent_id']}")
+    print(f"Dianne Mode: {meta['dianne_mode']} ({meta['dianne_name']})")
+    print(f"Consciousness: {meta['consciousness_level']}")
+    print(f"Geometric Coherence: {meta['geometric_coherence']:.3f}")
+    print(f"Narrative Entropy: {meta['narrative_entropy']:.3f}")
+    print(f"Octitrice Signature: {[f'{x:.2f}' for x in meta['octitrice_signature'][:4]]}...")
+
+    print("\n--- GEOMETRIC MOTIFS ---")
+    for i, motif in enumerate(meta["geometric_motifs"][:3]):
+        print(f"  {i+1}. {motif['name']} ({motif['geometric_primitive']})")
+        print(f"     Valence: {motif['emotional_valence']:.2f}, Position: {motif['temporal_position']:.2f}")
+
     return agent, result
 
 
-async def demo_collaborative_narrative():
-    """Demonstrate multi-agent collaborative narrative"""
-    print("\n=== Multi-Agent Collaborative Narrative Demo ===\n")
-    
-    # Create multiple agents with different styles
-    agents = []
-    styles = [
-        NarrativeStyle(voice="stark", pacing=0.8, complexity=0.3),
-        NarrativeStyle(voice="poetic", pacing=0.4, complexity=0.9),
-        NarrativeStyle(voice="verbose", pacing=0.5, complexity=0.7)
-    ]
-    
-    # Initialize collaboration protocol
-    protocol = MultiAgentProtocol()
-    
-    for i, style in enumerate(styles):
-        agent = AutonomousNarrativeAgent(f"agent_{i:03d}", style)
-        agent.collaboration_protocol = protocol
-        await protocol.register_agent(agent.agent_id, agent)
-        agents.append(agent)
-    
-    # Base narrative seed
-    base_narrative = "The soldier stood at the threshold of understanding."
-    
-    # Collaborative enhancement
-    print("Starting collaborative narrative enhancement...")
-    enhanced = await protocol.collaborative_weave(
-        [a.agent_id for a in agents],
-        base_narrative
-    )
-    
-    print("\n--- Collaborative Result ---")
-    print(f"Original: {base_narrative}")
-    print(f"Enhanced: {enhanced}")
-    
-    # Show collaboration history
-    print("\n--- Collaboration History ---")
-    for event in protocol.conversation_history[-3:]:
-        print(f"Proposer: {event['proposer']}")
-        print(f"Approved: {event['approved']}")
-        print(f"Votes: {event['votes']}")
-        print()
-
-
 if __name__ == "__main__":
-    # Run demonstrations
-    asyncio.run(demo_narrative_generation())
-    asyncio.run(demo_collaborative_narrative())
+    asyncio.run(demo_conscious_narrative())
